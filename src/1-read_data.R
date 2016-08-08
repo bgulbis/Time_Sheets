@@ -3,6 +3,7 @@
 library(readxl)
 library(purrr)
 library(dplyr)
+library(lubridate)
 
 data.raw <- "data/raw"
 
@@ -20,4 +21,5 @@ hrs <- summarize_all(docs, sum, na.rm = TRUE)
 
 # get Toggl data
 toggl <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
-                    recursive = TRUE, full.names = TRUE)
+                    recursive = TRUE, full.names = TRUE) %>%
+    map_df(read_excel)
