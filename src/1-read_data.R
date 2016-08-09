@@ -18,7 +18,9 @@ hrs <- list.files(data.raw, pattern = "^[Instructor|0-9].*(xlsx)",
     filter(X0 == "TOTAL") %>%
     select(admin = X4, precept = X6, other = X8) %>%
     mutate_all(as.numeric) %>%
-    summarize_all(sum, na.rm = TRUE)
+    summarize_all(sum, na.rm = TRUE) %>%
+    mutate(User = "preceptors") %>%
+    select(User, everything())
 
 # get Toggl data
 toggl <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
@@ -35,4 +37,7 @@ toggl <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
     spread(group, rec.time, fill = 0)
 
 # combine hours
-total <-
+total <- bind_rows(toggl, hrs) %>%
+    ungroup() %>%
+    select(-User) %>%
+    summarize_all(sum, na.rm = TRUE)
