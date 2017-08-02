@@ -47,7 +47,7 @@ toggl_fy17 <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
     spread(group, rec.time, fill = 0)
 
 # combine hours
-total_fy17 <- bind_rows(toggl, hrs) %>%
+total_fy17 <- bind_rows(toggl_fy17, hrs_fy17) %>%
     ungroup() %>%
     select(-User) %>%
     summarize_all(sum, na.rm = TRUE)
