@@ -7,23 +7,33 @@ library(lubridate)
 library(stringr)
 library(tidyr)
 
-data.raw <- "data/raw"
+data.raw <- "data/raw/2015-2016"
 
 # get non-Toggl data
 cols <- rep("text", 11)
 
-hrs <- list.files(data.raw, pattern = "^[Instructor|0-9].*(xlsx)",
+hrs_fy16 <- list.files(data.raw, pattern = "^[Instructor|0-9].*(xlsx)",
                    recursive = TRUE, full.names = TRUE) %>%
     map_df(read_excel, col_names = FALSE, col_types = cols) %>%
-    filter(X0 == "TOTAL") %>%
-    select(admin = X4, precept = X6, other = X8) %>%
+    filter(X__1 == "TOTAL") %>%
+    select(admin = X__5, precept = X__7, other = X__9) %>%
     mutate_all(as.numeric) %>%
     summarize_all(sum, na.rm = TRUE) %>%
     mutate(User = "preceptors") %>%
     select(User, everything())
 
+jen_fy16 <- list.files(data.raw, pattern = "^[Instructor|0-9].*(Cortes).*(xlsx)",
+                  recursive = TRUE, full.names = TRUE) %>%
+    map_df(read_excel, col_names = FALSE, col_types = cols) %>%
+    filter(X__1 == "TOTAL") %>%
+    select(admin = X__5, precept = X__7, other = X__9) %>%
+    mutate_all(as.numeric) %>%
+    summarize_all(sum, na.rm = TRUE) %>%
+    mutate(User = "Jen Cortes") %>%
+    select(User, everything())
+
 # get Toggl data
-toggl <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
+toggl_fy16 <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
                     recursive = TRUE, full.names = TRUE) %>%
     map_df(read_excel) %>%
     filter(str_detect(Project, regex("resid|admin|pgy1", ignore_case = TRUE))) %>%
@@ -37,7 +47,7 @@ toggl <- list.files(data.raw, pattern = ".*(Toggl).*(xlsx)",
     spread(group, rec.time, fill = 0)
 
 # combine hours
-total <- bind_rows(toggl, hrs) %>%
+total_fy16 <- bind_rows(toggl, hrs) %>%
     ungroup() %>%
     select(-User) %>%
     summarize_all(sum, na.rm = TRUE)
